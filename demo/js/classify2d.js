@@ -7,7 +7,7 @@ var layer_defs, net, trainer;
 var t = "\n\
 layer_defs = [];\n\
 layer_defs.push({type:'input', out_sx:1, out_sy:1, out_depth:2});\n\
-layer_defs.push({type:'fc', num_neurons:6, activation: 'tanh'});\n\
+//layer_defs.push({type:'fc', num_neurons:6, activation: 'tanh'});\n\
 layer_defs.push({type:'fc', num_neurons:2, activation: 'tanh'});\n\
 layer_defs.push({type:'softmax', num_classes:2});\n\
 \n\
@@ -56,6 +56,11 @@ function original_data(){
   
   data = [];
   labels = [];
+  data.push([0., 0.]); labels.push(0);
+  data.push([1., 1.]); labels.push(0);
+  data.push([0., 1.]); labels.push(1);
+  data.push([1., 0.]); labels.push(1);
+/*
   data.push([-0.4326  ,  1.1909 ]); labels.push(1);
   data.push([3.0, 4.0]); labels.push(1);
   data.push([0.1253 , -0.0376   ]); labels.push(1);
@@ -69,6 +74,7 @@ function original_data(){
   data.push([0.5 ,   3.2  ]); labels.push(1);
   data.push([0.8 ,   3.2  ]); labels.push(1);
   data.push([1.0 ,   -2.2  ]); labels.push(1);
+*/
   N = labels.length;
 }
 
@@ -168,7 +174,7 @@ function draw(){
 
         //ctx.fillStyle = 'rgb(150,' + Math.floor(a.w[0]*105)+150 + ',150)';
         //ctx.fillStyle = 'rgb(' + Math.floor(a.w[0]*255) + ',' + Math.floor(a.w[1]*255) + ', 0)';
-        ctx.fillRect(x-density/2-1, y-density/2-1, density+2, density+2);
+        ctx.fillRect(x-density/2-1, HEIGHT-(y-density/2)-2, density+2, density+2);
 
         if(cx%gridstep === 0 && cy%gridstep===0) {
           // record the transformation information
@@ -209,9 +215,9 @@ function draw(){
         if(ix1 >= 0 && ix2 >= 0 && ix1 < ng && ix2 < ng && y<n-1) { // check oob
           var xraw = gridx[ix1];
           xraw1 = visWIDTH*(gridx[ix1] - mmx.minv)/mmx.dv;
-          yraw1 = visHEIGHT*(gridy[ix1] - mmy.minv)/mmy.dv;
+          yraw1 = visHEIGHT - visHEIGHT*(gridy[ix1] - mmy.minv)/mmy.dv;
           xraw2 = visWIDTH*(gridx[ix2] - mmx.minv)/mmx.dv;
-          yraw2 = visHEIGHT*(gridy[ix2] - mmy.minv)/mmy.dv;
+          yraw2 = visHEIGHT - visHEIGHT*(gridy[ix2] - mmy.minv)/mmy.dv;
           visctx.moveTo(xraw1, yraw1);
           visctx.lineTo(xraw2, yraw2);
         }
@@ -228,9 +234,9 @@ function draw(){
         if(ix1 >= 0 && ix2 >= 0 && ix1 < ng && ix2 < ng && x <n-1) { // check oob
           var xraw = gridx[ix1];
           xraw1 = visWIDTH*(gridx[ix1] - mmx.minv)/mmx.dv;
-          yraw1 = visHEIGHT*(gridy[ix1] - mmy.minv)/mmy.dv;
+          yraw1 = visHEIGHT - visHEIGHT*(gridy[ix1] - mmy.minv)/mmy.dv;
           xraw2 = visWIDTH*(gridx[ix2] - mmx.minv)/mmx.dv;
-          yraw2 = visHEIGHT*(gridy[ix2] - mmy.minv)/mmy.dv;
+          yraw2 = visHEIGHT - visHEIGHT*(gridy[ix2] - mmy.minv)/mmy.dv;
           visctx.moveTo(xraw1, yraw1);
           visctx.lineTo(xraw2, yraw2);
         }
@@ -247,14 +253,14 @@ function draw(){
       if(labels[i]==1) ctx.fillStyle = 'rgb(100,200,100)';
       else ctx.fillStyle = 'rgb(200,100,100)';
       
-      drawCircle(data[i][0]*ss+WIDTH/2, data[i][1]*ss+HEIGHT/2, 5.0);
+      drawCircle(data[i][0]*ss+WIDTH/2, HEIGHT/2-data[i][1]*ss, 5.0);
 
       // also draw transformed data points while we're at it
       netx.w[0] = data[i][0];
       netx.w[1] = data[i][1]
       var a = net.forward(netx, false);
       var xt = visWIDTH * (net.layers[lix].out_act.w[d0] - mmx.minv) / mmx.dv; // in screen coords
-      var yt = visHEIGHT * (net.layers[lix].out_act.w[d1] - mmy.minv) / mmy.dv; // in screen coords
+      var yt = visHEIGHT - visHEIGHT * (net.layers[lix].out_act.w[d1] - mmy.minv) / mmy.dv; // in screen coords
       if(labels[i]==1) visctx.fillStyle = 'rgb(100,200,100)';
       else visctx.fillStyle = 'rgb(200,100,100)';
       visctx.beginPath();
@@ -313,7 +319,7 @@ $(function() {
     visWIDTH = viscanvas.width;
     visHEIGHT = viscanvas.height;
 
-    circle_data();
+    original_data();
     $("#layerdef").val(t);
     reload();
     NPGinit(20);
